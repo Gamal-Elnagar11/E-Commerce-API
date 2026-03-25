@@ -1,0 +1,9 @@
+@E_Commerce_API_HostAddress = http://localhost:5161
+
+GET {{E_Commerce_API_HostAddress}}/GetAllProducts
+Accept: application/json
+
+###
+
+
+ 

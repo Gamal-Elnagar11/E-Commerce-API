@@ -1,0 +1,161 @@
+﻿using System.Linq.Expressions;
+using System.Security.AccessControl;
+using AutoMapper;
+using E_Commerce_API.DTO.ProductDTO;
+using E_Commerce_API.Models;
+using E_Commerce_API.Service.Interface;
+using E_Commerce_API.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace E_Commerce_API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    
+    public class ProductController : ControllerBase
+    {
+
+        private readonly IProductService _productService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public ProductController(IUnitOfWork unitOfWork, IProductService productService, IMapper mapper)
+        {
+            _productService = productService;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+
+
+        [HttpGet("GetAllProduct")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllProduct()
+        {
+
+            try
+            {
+
+
+                var resutl1 = await _productService.GetAllProducts().ToListAsync();
+                var result2 = _mapper.Map<List<ResponseProduct>>(resutl1);
+                return Ok(result2);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(  ex.Message );
+            }
+        }
+
+
+        [HttpGet("Search")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Search(string? name)
+        {
+
+            if (string.IsNullOrEmpty(name))
+                return BadRequest("Search Value is required"); 
+
+            var getproduct = await _productService.Search(name);
+                var result = _mapper.Map<List<ProductBaseDTO>>(getproduct);
+                return Ok(result);
+            
+        }
+
+
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProductById(int id)
+        {
+            try
+            {
+                var findid = await _productService.GetProductByIdAsync(id);
+                if (findid == null)
+                    return NotFound("Product ID Not Found");
+
+                var resutl = _mapper.Map<ResponseProduct>(findid);
+
+                return Ok(resutl);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("AddProduct")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<IActionResult> AddProduct(AddProductDTO productDTO)
+        {
+            try
+            {
+                var map = _mapper.Map<Product>(productDTO);
+                 var result =  await _productService.AddProductAsync(map);
+
+                  var endresult = _mapper.Map<ResponseProduct>(result);
+ 
+                return Ok(endresult);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
+
+
+
+        [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<IActionResult> UpdateProduct([FromRoute]int id ,UpdateProductDTO updateDTO)
+        {
+            try
+            {
+                var findid = await _productService.GetProductByIdAsync(id);
+                if (findid == null)
+                    return NotFound("Product ID Not Found");
+
+                var findCategory = await _productService.CategoryExistsAsync(updateDTO.CategoryId);
+                if (!findCategory)
+                    return NotFound("Category ID Not Found");
+
+                _mapper.Map(updateDTO , findid);
+
+                var result = await _productService.UpdateProductAsync(id, findid);
+
+                 var map = _mapper.Map<ResponseProduct>(result);
+
+                return Ok(map);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var findid = await _productService.GetProductByIdAsync(id);
+            if (findid == null)
+                return NotFound("ID For Product Not Found");
+
+            var result = await _productService.DeleteProductAsync(id);
+            var result2 = _mapper.Map<ResponseProduct>(result);
+            return Ok(result2);
+
+
+        }
+
+
+    }
+}
