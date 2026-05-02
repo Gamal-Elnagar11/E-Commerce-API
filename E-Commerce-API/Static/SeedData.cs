@@ -10,8 +10,8 @@ namespace E_Commerce_API.Static
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
-            string adminEmail = "admin@example.com";
-            string adminPassword = "Admin123!";
+            string adminEmail = "admin";
+            string adminPassword = "123";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
