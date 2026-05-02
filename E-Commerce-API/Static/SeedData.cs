@@ -19,7 +19,11 @@ namespace E_Commerce_API.Static
                 {
                     UserName = "Admin",
                     Email = adminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    PhoneNumber = "012012012",
+                    Country = "Egypt",
+                    DateOfBirth = new DateOnly(2000, 1, 1),
+                    FullName = "I am Admin"
                 };
                 var result = await userManager.CreateAsync(user, adminPassword);
                 if (result.Succeeded)

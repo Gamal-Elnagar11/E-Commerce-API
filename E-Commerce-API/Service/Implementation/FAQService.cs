@@ -56,7 +56,7 @@ namespace E_Commerce_API.Service.Implementation
 
 
 
-        public async Task<FAQ> UpdateFAQ(FAQ fAQ)
+        public async Task<FAQ> UpdateFAQ(FAQtest fAQ)
         {
             var getid = await _unitOfWork.Repositoey<FAQ>().GetByIdAsync(fAQ.Id);
             if (getid == null)

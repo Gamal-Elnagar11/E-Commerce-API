@@ -9,6 +9,7 @@ namespace E_Commerce_API.Mapping
         public FAQProfile()
         {
             CreateMap<FAQ,FAQsDTO>().ReverseMap();
+            CreateMap<FAQ,FAQtest>().ReverseMap();
             CreateMap<FAQ, AnswerDTO>();
             CreateMap<FAQ, GetAllQuastionDTO>();
         }

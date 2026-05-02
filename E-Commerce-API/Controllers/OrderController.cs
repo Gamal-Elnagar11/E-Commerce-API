@@ -26,7 +26,16 @@ namespace E_Commerce_API.Controllers
                 _contextAccessor = contextAccessor;
             }
 
-            [HttpPost("Checkout->Create-Order")]
+        [HttpPost("Checkout->Create-Order")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal1")]
+        [EndpointSummary("Create New Order")]
+        [EndpointDescription("Create New Order and Confirm Shippeing Data")]
+
             public async Task<IActionResult> Checkout([FromBody] CheckoutDTO dto)
             {
                 try
@@ -48,9 +57,18 @@ namespace E_Commerce_API.Controllers
                     return BadRequest(ex.Message);
                 }
             }
-         
-        
-           [HttpGet("My-Orders")]
+
+
+        [HttpGet("My-Orders")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal2")]
+        [EndpointSummary("Get My Order")]
+        [EndpointDescription("Get My Order From System and Get Status Of Order")]
+
+
             public async Task<IActionResult> GetMyOrders()
             {
                 try
@@ -66,9 +84,16 @@ namespace E_Commerce_API.Controllers
                     return BadRequest(ex.Message);
                 }
             }
-         
-        
-            [HttpGet("{orderId}")]
+
+        [HttpGet("{orderId}")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal3")]
+        [EndpointSummary("Get Cart By Id")]
+        [EndpointDescription("Get Any Cart With Id")]
+
          public async Task<IActionResult> GetOrderById(int orderId)
             {
                 try
@@ -84,7 +109,17 @@ namespace E_Commerce_API.Controllers
             }
 
          
-            [HttpGet("AllOrders")]
+        [HttpGet("AllOrders")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal4")]
+        [EndpointSummary("Get All Orders")]
+        [EndpointDescription("Get All Orders From System")]
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> GetAllOrders()
             {
@@ -102,8 +137,17 @@ namespace E_Commerce_API.Controllers
          
         
         
-            [HttpPut("{orderId}/StatusOrder")]
-           [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [HttpPut("{orderId}/StatusOrder")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal5")]
+        [EndpointSummary("Update Status Order")]
+        [EndpointDescription("Controll Of Status Order Like Peinding or Confirmed")]
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromQuery] OrderStatus status)
             {
                 try
@@ -119,8 +163,16 @@ namespace E_Commerce_API.Controllers
             }
 
 
-            [HttpGet("Payment-Methods")]
-            public IActionResult GetPaymentMethods()
+        [HttpGet("Payment-Methods")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointName("Gamal6")]
+        [EndpointSummary("Payment Methods")]
+        [EndpointDescription("Get All Payment Method From System")]
+
+        public IActionResult GetPaymentMethods()
             {
                 var methods = Enum.GetValues(typeof(Payment))
                                   .Cast<Payment>()

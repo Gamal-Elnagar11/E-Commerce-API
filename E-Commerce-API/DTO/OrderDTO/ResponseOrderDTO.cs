@@ -10,7 +10,8 @@ namespace E_Commerce_API.DTO.OrderDTO
             public decimal TotalPrice { get; set; }
             public OrderStatus Status { get; set; }
             public Payment PaymentMethod { get; set; }
-            public DateTime Date { get; set; } = DateTime.UtcNow;
+       // [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm:ss}")]
+            public DateTime Date { get; set; } = DateTime.UtcNow;    ////////
             public string PhoneNumber { get; set; }
             public string City { get; set; }
             public string Address { get; set; }

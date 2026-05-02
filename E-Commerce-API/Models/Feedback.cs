@@ -14,5 +14,8 @@ namespace E_Commerce_API.Models
 
         [JsonIgnore]
         public DateTime CreatedAt { get; set; }
+
+        public User? User { get; set; }
+
     }
 }

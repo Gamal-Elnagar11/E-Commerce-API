@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using E_Commerce_API.DTO.Identity;
 using E_Commerce_API.Models;
 using E_Commerce_API.Service.Implementation;
@@ -120,7 +121,7 @@ namespace E_Commerce_API.Controllers
 
 
 
-        [HttpPut("DeletUser")]
+        [HttpPut("DeleteUser")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(string email)
         {
@@ -133,7 +134,6 @@ namespace E_Commerce_API.Controllers
                 "Deleted Successfuly" => Ok("User Deleted Successfuly")
             };
         }
-
 
 
 

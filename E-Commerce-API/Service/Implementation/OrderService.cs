@@ -21,44 +21,66 @@ namespace E_Commerce_API.Service.Implementation
         }
         public async Task<Order> Checkout(string userId, string phone, string city, string address, Payment paymentMethod)
         {
-            // 1. جلب الكارت الحالي
-            var cart = await _cartService.GetOrCreateCart();
-
-            if (!cart.CartItems.Any())
-                throw new Exception("Cart is empty");
-        
-            // 2. إنشاء Order جديد
-            var order = new Order
+            var trans = await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                UserId = userId,
-                PhoneNumber = phone,
-                City = city,
-                Address = address,
-                
-                PaymentMethod = paymentMethod,
-                Status = paymentMethod == Payment.CreditCard ? OrderStatus.PendingPayment : OrderStatus.Pending,
-                DateTime = DateTime.UtcNow,
-                OrderItems = cart.CartItems.Select(ci => new OrderItem
+                var cart = await _cartService.GetOrCreateCart();
+
+                if (!cart.CartItems.Any())
+                    throw new Exception("Cart is empty");
+
+                // 2. إنشاء Order جديد
+                var order = new Order
                 {
-                    ProductId = ci.ProductId,
-                    ProductName = ci.Products.Name,
-                    Quantity = ci.Quantity,
-                    Price = ci.Products.Price,
-                    TotalPrice = ci.Quantity * ci.Products.Price
-                }).ToList(),
-                TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.UnitPrice)
-               // TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.Products.Price)
-            };
+                    UserId = userId,
+                    PhoneNumber = phone,
+                    City = city,
+                    Address = address,
 
-            // 3. حفظ الطلب
-            await _unitOfWork.OrderRepo.AddOrder(order);
-            await _unitOfWork.CompleteAsync();
+                    PaymentMethod = paymentMethod,
+                    Status = paymentMethod == Payment.CreditCard ? OrderStatus.PendingPayment : OrderStatus.Pending,
+                    DateTime = DateTime.UtcNow,
+                    OrderItems = cart.CartItems.Select(ci => new OrderItem
+                    {
+                        ProductId = ci.ProductId,
+                        ProductName = ci.Products.Name,
+                        Quantity = ci.Quantity,
+                        Price = ci.Products.Price,
+                        TotalPrice = ci.Quantity * ci.Products.Price
+                    }).ToList(),
+                    TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.Products.Price)
+                    // TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.Products.Price)
+                };
+                foreach (var item in cart.CartItems)
+                {
+                    var product = await _unitOfWork.ProductRepo.GetProductsByIdAsync(item.ProductId);
 
-            // 4. تفريغ الكارت بعد إنشاء الطلب
-            await _cartService.ClearCart(cart);
+                    if (product == null)
+                        throw new Exception($"Product with id {item.ProductId} not found");
 
-            //return order;
-            return await _unitOfWork.OrderRepo.GetOrderById(order.Id);
+                    if (product.Stock < item.Quantity)
+                        throw new Exception($"Not enough stock for product {product.Name}");
+
+                    product.Stock -= item.Quantity;
+
+                    _unitOfWork.ProductRepo.UpdateProduct(product);
+                }
+
+
+                // 3. حفظ الطلب
+                await _unitOfWork.OrderRepo.AddOrder(order);
+                await _unitOfWork.CompleteAsync();
+                await trans.CommitAsync();
+                 await _cartService.ClearCart(cart);
+
+                 return await _unitOfWork.OrderRepo.GetOrderById(order.Id);
+
+            }
+            catch (Exception ex)
+            {
+                await trans.RollbackAsync();
+                throw ;
+            }
         }
 
 

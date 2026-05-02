@@ -24,14 +24,7 @@ namespace E_Commerce_API.Controllers
                 _mapper = mapper;
             }
 
-        //[HttpGet("whoami")]
-        //public IActionResult WhoAmI()
-        //{
-        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-        //                 ?? User.FindFirst("sub")?.Value;
-        //    return Ok(new { UserId = userId });
-        //}
-
+        
         [HttpGet("MyCart")]
             public async Task<IActionResult> GetMyCart()
             {
@@ -48,21 +41,21 @@ namespace E_Commerce_API.Controllers
             }
       
         
-           [HttpGet("AllCart")]
-          [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> GetAllCarts()
-            {
-                try
-                {
-                    var carts = await _cartService.GetAllCarts();
-                    var map = _mapper.Map<List<ResponseCartDTO>>(carts);
-                     return Ok(map);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-            }
+        //   [HttpGet("AllCart")]
+        //  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        //public async Task<IActionResult> GetAllCarts()
+        //    {
+        //        try
+        //        {
+        //            var carts = await _cartService.GetAllCarts();
+        //            var map = _mapper.Map<List<ResponseCartDTO>>(carts);
+        //             return Ok(map);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return BadRequest(ex.Message);
+        //        }
+        //    }
        
         
            [HttpPost("add-item-to-cart")]

@@ -5,6 +5,7 @@ using E_Commerce_API.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce_API.Controllers
@@ -21,6 +22,23 @@ namespace E_Commerce_API.Controllers
             _mapper = mapper;
         }
 
+
+
+        [HttpGet("{id}", Name ="GetById")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+              var getid = await _categoryService.GetCategoryByIdAsync(id);
+                var map = _mapper.Map<CategorywithProductDTO>(getid);
+                return Ok(map);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
 
         [HttpGet("Get All Category With Products")]
@@ -95,7 +113,7 @@ namespace E_Commerce_API.Controllers
         }
 
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCategory")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> UpdatCategory(int id , CategoryName categoryName)
         {
@@ -113,7 +131,7 @@ namespace E_Commerce_API.Controllers
         }
 
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCategory")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

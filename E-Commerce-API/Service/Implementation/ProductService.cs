@@ -218,6 +218,20 @@ namespace E_Commerce_API.Service.Implementation
             
         }
 
+        public async Task<Product> UpdateStock(int id ,int stock)
+        {
+            var product = await _unitOfWork.Repositoey<Product>().GetByIdAsync(id);
+            if (product == null)
+                throw new ArgumentException("Product Not Found");
+
+            if (stock < 0)
+                throw new ArgumentException("Stock cannot be nagative");
+
+            product.Stock = stock;
+            await _unitOfWork.CompleteAsync();
+            return product;
+
+        }
 
 
 

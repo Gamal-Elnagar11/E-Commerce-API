@@ -32,7 +32,12 @@ namespace E_Commerce_API.Controllers
 
 
 
-        [HttpGet("GetAllProduct")]
+        [HttpGet("Products")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Get ALl Products")]
+        [EndpointDescription("Get All Products From System")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAllProduct()
         {
@@ -53,6 +58,11 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpGet("Search")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Search in Products")]
+        [EndpointDescription("Get All Products From System That Contain Value In Search")]
         [AllowAnonymous]
         public async Task<IActionResult> Search(string? name)
         {
@@ -68,6 +78,11 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpGet("{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Get Product By Id")]
+        [EndpointDescription("Get Any Product From System That Contain Value In Search")]
         [AllowAnonymous]
         public async Task<IActionResult> GetProductById(int id)
         {
@@ -90,6 +105,14 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpPost("AddProduct")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Add New Product")]
+        [EndpointDescription("Add a New Product To System Specific By Admin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> AddProduct(AddProductDTO productDTO)
         {
@@ -113,6 +136,14 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpPut("{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Update Product By Id")]
+        [EndpointDescription("Update a Product From System Specific By Admin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> UpdateProduct([FromRoute]int id ,UpdateProductDTO updateDTO)
         {
@@ -141,7 +172,42 @@ namespace E_Commerce_API.Controllers
         }
 
 
+
+
+        [HttpPut("/stock/{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Update Stock By Id")]
+        [EndpointDescription("Update a Stock Prduct From System Specific By Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<IActionResult> UpdateQuantity(int id , int stock)
+        {
+            try
+            {
+                await _productService.UpdateStock(id, stock);
+                return NoContent();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
         [HttpDelete("{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        [EndpointSummary("Delete Product By Id")]
+        [EndpointDescription("Delete Prduct From System Specific By Admin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

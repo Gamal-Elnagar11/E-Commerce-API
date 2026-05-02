@@ -143,6 +143,10 @@ namespace E_Commerce_API.Service.Implementation
             var existproduct = cart.CartItems
                 .FirstOrDefault(a => a.ProductId == productid);
 
+            int currentInCart = existproduct?.Quantity ?? 0;
+            if (product.Stock < (currentInCart + quantity))
+                throw new ArgumentException($"Cannot add more. Total in cart would exceed stock. Available: {product.Stock}");
+
             if (existproduct != null)
             {
                 existproduct.Quantity += quantity;

@@ -1,21 +1,23 @@
 ﻿
+using E_Commerce_API.Controllers;
 using E_Commerce_API.Data;
-using E_Commerce_API.Models;
 using E_Commerce_API.Mapping;
+using E_Commerce_API.Models;
+using E_Commerce_API.OpenAPI;
+using E_Commerce_API.Reposatory.Implementation;
+using E_Commerce_API.Reposatory.Interface;
+using E_Commerce_API.Service.Implementation;
+using E_Commerce_API.Service.Interface;
+ using E_Commerce_API.Static;
+using E_Commerce_API.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
- using E_Commerce_API.Static;
-using E_Commerce_API.UnitOfWork;
-using E_Commerce_API.Service.Interface;
-using E_Commerce_API.Service.Implementation;
 using System.IdentityModel.Tokens.Jwt;
-using E_Commerce_API.Reposatory.Interface;
-using E_Commerce_API.Reposatory.Implementation;
-using E_Commerce_API.Controllers;
+using System.Text;
 using System.Text.Json.Serialization;
 
 
@@ -48,7 +50,27 @@ namespace E_Commerce_API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>
             {
-            
+
+
+                opt.OperationFilter<OpenApiSpecification>();
+                opt.CustomOperationIds(apiDesc =>
+                { 
+                    var name = apiDesc.ActionDescriptor.AttributeRouteInfo?.Name;
+                    if (!string.IsNullOrEmpty(name)) return name;
+                    return apiDesc.RelativePath?.Split('/').Last();
+                });
+                //opt.CustomOperationIds(apiDesc =>
+                //{
+                //    var controllerName = apiDesc.ActionDescriptor.RouteValues["controller"];
+                //    var actionName = apiDesc.ActionDescriptor.RouteValues["action"];
+                //    return $"{controllerName}_{actionName}";
+                //});
+                //opt.CustomOperationIds(options =>
+                //    {
+                //        return options.RelativePath?.Split('/').Last();
+                //    });
+
+
                 opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme.",
@@ -79,7 +101,7 @@ namespace E_Commerce_API
             opt.SwaggerDoc("v1", new OpenApiInfo()   // here V1 -> version 1 to api after audated on this you can set V2
             {
                 Version = "v1",
-                Title = "My API",
+                Title = "E-Commerce API",
                 Description = "api to manage project e-commerce",
                 TermsOfService = new Uri("http://tempuri.gamal"),    // here linke to page has info to api
                 Contact = new OpenApiContact                         // here info to owner
@@ -153,7 +175,15 @@ namespace E_Commerce_API
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
             builder.Services.AddScoped<IdentityUsers>();
             builder.Services.AddHttpClient();
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
 
             builder.Services.AddAuthorization(options =>
             {
@@ -182,7 +212,7 @@ namespace E_Commerce_API
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseCors("AllowAll");
 
             app.MapControllers();
 

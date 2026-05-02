@@ -37,7 +37,7 @@ namespace E_Commerce_API.Controllers
 
          
 
-        [HttpGet("Answer{id}")]
+        [HttpGet("Answer{id}", Name = "Answer-ID")]
         public async Task<IActionResult> GetAnswerById(int id)
         {
             try
@@ -55,7 +55,7 @@ namespace E_Commerce_API.Controllers
 
 
 
-        [HttpPost]
+        [HttpPost(Name = "AddQ")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> AddFAQ(FAQsDTO faqDTO)
         {
@@ -66,14 +66,14 @@ namespace E_Commerce_API.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut(Name ="UpdateQ")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> UpdateFAQ(FAQ faq)
+        public async Task<IActionResult> UpdateFAQ(FAQtest faq)
         {
             try
             {
                  var updated = await _faqService.UpdateFAQ(faq);
-                var map = _mapper.Map<FAQsDTO>(updated);
+                var map = _mapper.Map<FAQtest>(updated);
                 return Ok(map);
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace E_Commerce_API.Controllers
         }
 
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name ="DeleteQ")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> DeleteFAQ(int id)
         {

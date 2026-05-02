@@ -4,11 +4,21 @@ namespace E_Commerce_API.DTO.Identity
 {
     public class RegisterDTO
     {
+
+        [Required(ErrorMessage = "FullName is required")]
+        public string FullName { get; set; }
+
+        [Required(ErrorMessage = "Country is required")]
+        public string Country { get; set; }
+
+
+        [Required(ErrorMessage = "DateOfBirth is required")]
+         public DateOnly DateOfBirth { get; set; }
+
+        public string PhoneNumber { get; set; }
          
         [Required]
         public string UserName { get; set; }
-
-        public string PhoneNumber { get; set; }
 
         [Required]
         [EmailAddress]
@@ -24,8 +34,7 @@ namespace E_Commerce_API.DTO.Identity
         public string ConfirmPassword { get; set; }
 
 
-
-
+         
 
     }
 }
