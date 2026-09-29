@@ -17,46 +17,56 @@ namespace E_Commerce_API.Reposatory.Implementation
             _db = db;
         }
 
-            public async Task AddOrder(Order order)
-            {
-                await _db.Orders.AddAsync(order);
-            }
+        public async Task AddOrder(Order order)
+        {
+            await _db.Orders.AddAsync(order);
+        }
 
-            public async Task<Order> GetOrderById(int orderId)
-            {
-                return await _db.Orders
-                    .Include(o => o.OrderItems)
-                    .ThenInclude(a => a.Products)
-                    .Include( a => a.User)
-                    .FirstOrDefaultAsync(o => o.Id == orderId);
-            }
+        public async Task<Order> GetOrderById(int orderId)
+        {
+            return await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(a => a.Products)
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
 
-            public async Task<List<Order>> GetOrdersByUserId(string userId)
-            {
-                return await _db.Orders
-                    .Include(o => o.OrderItems)
-                    .ThenInclude(a => a.Products)
-                    .Include( a => a.User)
-                    .Where(o => o.UserId == userId)
-                    .ToListAsync();
-            }
+        public async Task<List<Order>> GetOrdersByUserId(string userId)
+        {
+            return await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(a => a.Products)
+                .Include(a => a.User)
+                .Where(o => o.UserId == userId)
+                .ToListAsync();
+        }
 
-            public async Task<List<Order>> GetAllOrders()
-            {
-                return await _db.Orders
-                    .Include(o => o.OrderItems)
-                    .Include(a => a.User)
-                    .ToListAsync();
-            }
+        public async Task<List<Order>> GetAllOrders()
+        {
+            return await _db.Orders
+                .Include(o => o.OrderItems)
+                .Include(a => a.User)
+                .ToListAsync();
+        }
 
-            public async Task UpdateOrderStatus(int orderId, OrderStatus status)
-            {
-                var order = await _db.Orders.FindAsync(orderId);
-                if (order == null) throw new Exception("Order not found");
-                order.Status = status;
-            }
+        public async Task UpdateOrderStatus(int orderId, OrderStatus status)
+        {
+            var order = await _db.Orders.FindAsync(orderId);
+            if (order == null) throw new Exception("Order not found");
+            order.Status = status;
+        }
 
+        public async Task DeleteOrder(int orderId)
+        {
+             var order = await _db.Orders.FindAsync(orderId);
+
+            // 2. التأكد أن الأوردر موجود
+            if (order == null)
+                throw new KeyNotFoundException("Order ID Not Found");
              
-        
+                 _db.Orders.Remove(order);
+                 await _db.SaveChangesAsync();
+            
+        }
     }
-}
+    }

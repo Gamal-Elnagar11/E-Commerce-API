@@ -81,7 +81,7 @@ namespace E_Commerce_API.Controllers
                 {
                     
                     var cart = await _cartService.GetOrCreateCart();
-                     var item = await _cartService.UpdateItemCarrQuantity(cart, productId, newQuantity);
+                     var item = await _cartService.UpdateItemCartQuantity(productId, newQuantity);
                    var map = _mapper.Map<CartItemDTO>(item);
                     return Ok(map);  
                 }
@@ -98,7 +98,7 @@ namespace E_Commerce_API.Controllers
                 try
                 {
                     var cart = await _cartService.GetOrCreateCart();
-                     var item = await _cartService.DeleteItemFromCart(cart, productId);
+                     var item = await _cartService.DeleteItemFromCart(productId);
                   var map = _mapper.Map<CartItemDTO>(item);
                     return Ok(map);  
                 }

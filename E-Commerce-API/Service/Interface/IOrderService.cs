@@ -13,6 +13,7 @@ namespace E_Commerce_API.Service.Interface
 
         // جلب طلب واحد
         Task<Order> GetOrderById(int orderId);
+        Task DeleteOrderByID(int orderId);
 
         // جلب كل الطلبات (Admin)
         Task<List<Order>> GetAllOrders();

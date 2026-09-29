@@ -5,20 +5,15 @@ namespace E_Commerce_API.Reposatory.Interface
 {
     public interface IOrderRepo
     { 
-            // إضافة طلب جديد
-            Task AddOrder(Order order);
+             Task AddOrder(Order order);
 
-            // جلب طلب واحد بالـ Id
-            Task<Order> GetOrderById(int orderId);
+             Task<Order> GetOrderById(int orderId);
 
-            // جلب كل الطلبات لمستخدم محدد
-            Task<List<Order>> GetOrdersByUserId(string userId);
+             Task<List<Order>> GetOrdersByUserId(string userId);
+             Task<List<Order>> GetAllOrders();
 
-            // جلب كل الطلبات (Admin)
-            Task<List<Order>> GetAllOrders();
-
-            // تعديل حالة الطلب
-            Task UpdateOrderStatus(int orderId, OrderStatus status);
+             Task UpdateOrderStatus(int orderId, OrderStatus status);
+            Task DeleteOrder (int  orderId);
 
             
         

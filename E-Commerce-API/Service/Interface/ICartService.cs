@@ -11,9 +11,10 @@ namespace E_Commerce_API.Service.Interface
         public Task<Cart> GetOrCreateCart();
          public Task<Cart> ClearCart(Cart cart);
 
+        public  Task<Product> GetProductByIdAsync(int id);
 
         public Task<CartItem> AddItemCart( int productid, int quantity);
-        public Task<CartItem> UpdateItemCarrQuantity(Cart cart,int productid, int newquantity);
-        public Task<CartItem> DeleteItemFromCart(Cart cart, int productid);
+        public Task<CartItem> UpdateItemCartQuantity(int productid, int newquantity);
+        public Task<CartItem> DeleteItemFromCart(int productid);
     }
 }

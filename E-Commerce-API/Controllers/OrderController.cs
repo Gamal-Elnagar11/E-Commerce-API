@@ -91,7 +91,7 @@ namespace E_Commerce_API.Controllers
          [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
         [EndpointName("Gamal3")]
-        [EndpointSummary("Get Cart By Id")]
+        [EndpointSummary("Get Order By Id")]
         [EndpointDescription("Get Any Cart With Id")]
 
          public async Task<IActionResult> GetOrderById(int orderId)
@@ -180,8 +180,34 @@ namespace E_Commerce_API.Controllers
                                   .ToList();
                 return Ok(methods);
             }
-   
-    
+
+
+
+
+        [HttpDelete("{id}")]
+          [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+       // [EndpointName("Gamal6")]
+        [EndpointSummary("Delete Order By ID")]
+        [EndpointDescription("Delete Order By ID From System")]
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
+        public async Task<IActionResult> DeleteOrderByIDD(int id)
+        {
+            try
+            {
+                await  _orderService.DeleteOrderByID(id);
+                return Ok("Order Deleted Successfuly");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     
     }
     

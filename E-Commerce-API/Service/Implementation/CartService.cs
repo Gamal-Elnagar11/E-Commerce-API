@@ -4,6 +4,7 @@ using E_Commerce_API.Reposatory.Implementation;
 using E_Commerce_API.Service.Interface;
 using E_Commerce_API.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce_API.Service.Implementation
 {
@@ -20,6 +21,24 @@ namespace E_Commerce_API.Service.Implementation
             _unitOfWork = unitOfWork;
             _contextAccessor = httpContextAccessor;
         }
+
+
+
+
+
+        public async Task<Product> GetProductByIdAsync(int id)
+        {
+            var product = await _unitOfWork.Repositoey<Product>()
+                                 .GetAll()                     // IQueryable
+                                 .Include(p => p.Category)     // Include Relations
+                                 .FirstOrDefaultAsync(p => p.Id == id);
+
+            return product;
+
+
+        }
+
+
 
         //private string GetUserId()
         //{
@@ -108,7 +127,6 @@ namespace E_Commerce_API.Service.Implementation
             return cart;
         }
 
- 
 
 
 
@@ -120,86 +138,142 @@ namespace E_Commerce_API.Service.Implementation
 
 
 
-
-
-        public async Task<CartItem> AddItemCart( int productid, int quantity)
+        public async Task<CartItem> AddItemCart(int productid, int quantity)
         {
             var userid = GetUserId();
-            var cart = await _unitOfWork.CartRepo.GetCartByUserId(userid);
-            if(cart == null)
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity must be at least 1");
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
             {
-                cart = new Cart
+                try
                 {
-                    UserId = userid
-                };
-                await _unitOfWork.CartRepo.AddCart(cart);
-                await _unitOfWork.CompleteAsync();
+                    // 1. جلب المنتج (تأكد أن الـ Repository لا يستخدم AsNoTracking)
+                    var product = await _unitOfWork.ProductRepo.GetProductsByIdAsync(productid);
+                    if (product == null) throw new ArgumentException("Product not found");
+                   
+                       // 2. جلب السلة
+                    var cart = await _unitOfWork.CartRepo.GetCartByUserId(userid);
+                    if (cart == null)
+                    {
+                        cart = new Cart { UserId = userid };
+                        await _unitOfWork.CartRepo.AddCart(cart);
+                        // لا تستدعي CompleteAsync هنا، انتظر للنهاية
+                    }
 
+
+                    var existproduct = cart.CartItems?.FirstOrDefault(a => a.ProductId == productid);
+                    int currentInCart = existproduct?.Quantity ?? 0;
+
+                    // هنا نتحقق: هل المخزون المتاح يكفي (الكمية الحالية في السلة + الكمية الجديدة)؟
+                    if (product.Stock < (currentInCart + quantity))
+                        throw new ArgumentException("Product Quantity Not Found");
+  
+                    // 5. تحديث السلة
+                    if (existproduct != null)
+                    {
+                        existproduct.Quantity += quantity;
+                    }
+                    else
+                    {
+                        var newitem = new CartItem
+                        {
+                            CartId = cart.Id,
+                            Quantity = quantity,
+                            UnitPrice = product.Price,
+                            ProductId = product.Id
+                        };
+                        cart.CartItems.Add(newitem);
+                        existproduct = newitem; // للعودة به في النهاية
+                    }
+
+                    // 6. حفظ الكل (الخصم + الإضافة) في عملية واحدة
+                    await _unitOfWork.CompleteAsync();
+                    await transaction.CommitAsync();
+
+                    return existproduct;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw; // أعد رمي الخطأ ليعرف الـ Controller أن العملية فشلت
+                }
             }
-
-            var product = await _unitOfWork.ProductRepo.GetProductsByIdAsync(productid);
-            if (product == null)
-                throw new ArgumentException("Product not found");
-            var existproduct = cart.CartItems
-                .FirstOrDefault(a => a.ProductId == productid);
-
-            int currentInCart = existproduct?.Quantity ?? 0;
-            if (product.Stock < (currentInCart + quantity))
-                throw new ArgumentException($"Cannot add more. Total in cart would exceed stock. Available: {product.Stock}");
-
-            if (existproduct != null)
-            {
-                existproduct.Quantity += quantity;
-                await _unitOfWork.CompleteAsync();
-                return existproduct;
-            }
-            var newitem = new CartItem
-            {
-                CartId = cart.Id,
-                 Quantity = quantity,
-                UnitPrice = product.Price,
-                ProductId = product.Id,
-                
-
-            };
-            cart.CartItems = cart.CartItems ?? new List<CartItem>();
-            cart.CartItems.Add(newitem);
-              await _unitOfWork.CompleteAsync();
-              return newitem;
-
         }
 
-
-        public async Task<CartItem> UpdateItemCarrQuantity(Cart cart, int productid, int newquantity)
+        public async Task<CartItem> UpdateItemCartQuantity(int productid, int newquantity)
         {
-         
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productid);
+            var userid = GetUserId();
+            if (newquantity <= 0)
+                throw new ArgumentException("Quantity must be at least 1");
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 1. جلب المنتج المحدث (للتأكد من المخزن الحقيقي)
+                    var product = await _unitOfWork.ProductRepo.GetProductsByIdAsync(productid);
+                    if (product == null) throw new ArgumentException("Product not found");
 
-            if (cartItem == null)
-                throw new ArgumentException("Product not found in cart");
+                    // 2. جلب السلة
+                    var cart = await _unitOfWork.CartRepo.GetCartByUserId(userid);
+                    var cartItem = cart?.CartItems?.FirstOrDefault(ci => ci.ProductId == productid);
+                    if (cartItem == null) throw new ArgumentException("Product not found in cart");
 
-            cartItem.Quantity = newquantity;
-            await _unitOfWork.CompleteAsync();
- 
-            return cartItem;
-        }        
+                    
+                    if (newquantity > product.Stock)
+                        throw new ArgumentException("Product Quantity Not Found");
+                     
+                    // 5. تحديث السلة
+                    cartItem.Quantity = newquantity;
 
-        public async Task<CartItem> DeleteItemFromCart(Cart cart, int productid)
-        { 
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productid);
+                    // 6. الحفظ
+                    await _unitOfWork.CompleteAsync();
+                    await transaction.CommitAsync();
 
-            if (cartItem == null)
-                throw new ArgumentException("Product not found in cart");
-
-            cart.CartItems.Remove(cartItem);
-
-            await _unitOfWork.CompleteAsync();
-            return cartItem;
+                    return cartItem;
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
-    
+
+        public async Task<CartItem> DeleteItemFromCart(int productid)
+        {
+            var userid = GetUserId();
+
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 1. جلب المنتج والسلة
+                    var product = await _unitOfWork.ProductRepo.GetProductsByIdAsync(productid);
+                    var cart = await _unitOfWork.CartRepo.GetCartByUserId(userid);
+                    var cartItem = cart?.CartItems?.FirstOrDefault(ci => ci.ProductId == productid);
+
+                    if (cartItem == null)
+                        throw new ArgumentException("Product not found in cart");
+ 
+                    // 3. إزالة المنتج من السلة
+                    cart.CartItems.Remove(cartItem);
+
+                    // 4. حفظ التغييرات
+                    await _unitOfWork.CompleteAsync();
+                    await transaction.CommitAsync();
+
+                    return cartItem;
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        }
 
 
-         
+
 
 
     }

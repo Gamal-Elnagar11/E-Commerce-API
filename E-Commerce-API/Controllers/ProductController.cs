@@ -105,8 +105,7 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpPost("AddProduct")]
-        [Consumes("application/json")]
-        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
@@ -114,7 +113,7 @@ namespace E_Commerce_API.Controllers
         [EndpointSummary("Add New Product")]
         [EndpointDescription("Add a New Product To System Specific By Admin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> AddProduct(AddProductDTO productDTO)
+        public async Task<IActionResult> AddProduct([FromForm]AddProductDTO productDTO)
         {
             try
             {
@@ -136,8 +135,7 @@ namespace E_Commerce_API.Controllers
 
 
         [HttpPut("{id}")]
-        [Consumes("application/json")]
-        [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
+         [ProducesResponseType<ProblemDetails>(StatusCodes.Status200OK)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
@@ -145,7 +143,7 @@ namespace E_Commerce_API.Controllers
         [EndpointSummary("Update Product By Id")]
         [EndpointDescription("Update a Product From System Specific By Admin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> UpdateProduct([FromRoute]int id ,UpdateProductDTO updateDTO)
+        public async Task<IActionResult> UpdateProduct([FromRoute]int id , [FromForm] UpdateProductDTO updateDTO)
         {
             try
             {

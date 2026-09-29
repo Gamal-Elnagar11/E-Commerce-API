@@ -4,6 +4,7 @@ using E_Commerce_API.Reposatory.Interface;
 using E_Commerce_API.Service.Interface;
 using E_Commerce_API.Static;
 using E_Commerce_API.UnitOfWork;
+using Humanizer;
 
 namespace E_Commerce_API.Service.Implementation
 {
@@ -25,7 +26,7 @@ namespace E_Commerce_API.Service.Implementation
             try
             {
                 var cart = await _cartService.GetOrCreateCart();
-
+                
                 if (!cart.CartItems.Any())
                     throw new Exception("Cart is empty");
 
@@ -42,6 +43,7 @@ namespace E_Commerce_API.Service.Implementation
                     DateTime = DateTime.UtcNow,
                     OrderItems = cart.CartItems.Select(ci => new OrderItem
                     {
+                        
                         ProductId = ci.ProductId,
                         ProductName = ci.Products.Name,
                         Quantity = ci.Quantity,
@@ -119,6 +121,10 @@ namespace E_Commerce_API.Service.Implementation
             return await _unitOfWork.OrderRepo.GetOrderById(orderId);
         }
 
+        public async Task DeleteOrderByID(int orderId)
+        {
+              await _unitOfWork.OrderRepo.DeleteOrder(orderId);
+        }
     }
          
  }
