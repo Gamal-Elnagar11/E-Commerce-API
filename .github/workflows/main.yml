@@ -1,0 +1,37 @@
+name: Deploy E-Commerce API to MonsterASP
+
+on:
+  push:
+    branches:
+      - master    # الفرع الافتراضي عندك master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. سحب الكود من GitHub
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. تجهيز بيئة .NET SDK
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 3. بناء ونشر التطبيق (Publish)
+    - name: Publish API
+      run: |
+        dotnet publish ./E-Commerce-API/E-Commerce-API.csproj -c Release -o ./publish
+
+    # 4. الرفع التلقائي إلى MonsterASP عبر FTP
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./publish/
+        server-dir: /site/wwwroot/
+        dangerous-clean-slate: false
