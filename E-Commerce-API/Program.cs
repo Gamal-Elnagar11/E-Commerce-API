@@ -39,7 +39,12 @@ namespace E_Commerce_API
 
             builder.Services.AddDbContext<Application>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
 
-
+            // تسجيل Redis Distributed Cache
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                options.InstanceName = "Ecommerce_";  
+            });
 
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -201,15 +206,15 @@ namespace E_Commerce_API
                 app.UseSwaggerUI();
             
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                await SeedData.CreateRoles(services);
-                await SeedData.CreateAdmin(services);
-            }
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var services = scope.ServiceProvider;
+            //    await SeedData.CreateRoles(services);
+            //    await SeedData.CreateAdmin(services);
+            //}
 
             app.UseStaticFiles();
-            app.UseHttpsRedirection();
+           // app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAll");

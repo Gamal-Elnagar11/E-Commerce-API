@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. محرك Redis
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    restart: always
+    ports:
+      # خارجي : داخلي
+      - "5079:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce-net
+
+  # 2. الواجهة الرسومية للكاش (Redis Commander)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis_gui
+    restart: always
+    environment:
+      # داخل الشبكة، يتصل بالمنفذ الداخلي لـ Redis
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      # خارجي : داخلي
+      - "5081:8081"
+    depends_on:
+      - redis
+    networks:
+      - ecommerce-net
+
+  # 3. الـ API
+  e-commerce-api:
+    image: ${DOCKER_REGISTRY-}ecommerceapi
+    container_name: ecommerce_api
+    build:
+      context: .
+      dockerfile: E-Commerce-API/Dockerfile
+    depends_on:
+      - redis
+    ports:
+      # خارجي : داخلي
+      - "5050:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__conn=Server=host.docker.internal,1433;Database=E-Commercetest;User Id=GamalDocker2;Password=GamalDocker2123!@#;TrustServerCertificate=true;Encrypt=False;
+    networks:
+      - ecommerce-net
+    volumes:
+      - ./wwwroot/images:/app/wwwroot/images
+
+volumes:
+  redis_data:
+
+networks:
+  ecommerce-net:
+    driver: bridge

@@ -46,7 +46,7 @@ namespace E_Commerce_API.Controllers
             {
 
 
-                var resutl1 = await _productService.GetAllProducts().ToListAsync();
+                var resutl1 = await _productService.GetAllProducts();
                 var result2 = _mapper.Map<List<ResponseProduct>>(resutl1);
                 return Ok(result2);
             }
