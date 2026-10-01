@@ -37,14 +37,14 @@ namespace E_Commerce_API
 
             // Add services to the container.
 
-            builder.Services.AddDbContext<Application>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
+          //  builder.Services.AddDbContext<Application>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
 
             // تسجيل Redis Distributed Cache
-            builder.Services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = builder.Configuration.GetConnectionString("Redis");
-                options.InstanceName = "Ecommerce_";  
-            });
+            //builder.Services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+            //    options.InstanceName = "Ecommerce_";  
+            //});
 
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
